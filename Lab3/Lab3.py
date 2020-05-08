@@ -1,6 +1,7 @@
 import pymongo
 import time
 import pigpio
+import datetime
 
 def check_db_exist():
     dblist = myclient.list_database_names()
@@ -36,7 +37,7 @@ mycol = mydb["Temp_Sensor"]
 pi = pigpio.pi()
  
 x = pi.i2c_open(1, 0x2a)
-pi.i2c_write_byte_data(x, 0x54, 0xB5)
+pi.i2c_write_byte_data(x, 0x54, 0xB6)
 pi.i2c_close(x)
 try:
     o_time = time.time()
@@ -53,7 +54,7 @@ try:
             temp= (256.0*float(b0) + float(b1)) / 100.0
             print(temp)
             pi.i2c_close(h)
-            mydict = {"sensor_value": temp, "Time_stamp": time.time()}
+            mydict = {"sensor_value": temp, "Time_stamp": datetime.datetime.utcnow()}
             x = mycol.insert_one(mydict)
             o_time = time.time()
 except KeyboardInterrupt:
