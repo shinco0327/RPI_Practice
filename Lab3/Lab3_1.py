@@ -75,20 +75,21 @@ pi.i2c_close(x)
 
 try:
     o_time = time.time()
+    o_time -= 60
     while 1:
         if time.time()-o_time >= 60:
             VR_value = ReadADC(0)
             mydict = {"sensor_value": ReadVolts(VR_value, 2), "Time_stamp": datetime.datetime.utcnow()}
             x = mycol_vr.insert_one(mydict)
-            print("Read of potentiometer is "+VR_value)
-            print(ReadVolts(VR_value, 2), "Volts")
+            print("Read of potentiometer is "+ str(VR_value))
+            print(str(ReadVolts(VR_value, 2)) + "Volts")
 
             h = pi.i2c_open(1, 0x2a)
             b0 = pi.i2c_read_byte(h)
             time.sleep(0.001)
             b1 = pi.i2c_read_byte(h)
             temp= (256.0*float(b0) + float(b1)) / 100.0
-            print("Read of the first byte is "+b0+"\n the second is "+ b1 + "\n The temp is " temp)
+            print("Read of the first byte is "+str(b0)+"\n the second is "+ str(b1) + "\n The temp is "+str(temp))
             pi.i2c_close(h)
             mydict = {"sensor_value": temp, "Time_stamp": datetime.datetime.utcnow()}
             x = mycol_temp.insert_one(mydict)
