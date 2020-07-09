@@ -1,5 +1,6 @@
 import tkinter as tk
-import seeed_mlx90640
+import MLX90640 as mlx
+import math
 
 
 def draw_rectangle(x, y, r, g, b):
@@ -31,8 +32,7 @@ def temp_color(x, y, temp, limt_temp):
         b = (t-510)
     draw_rectangle(x ,y , int(r), int(g), int(b))
 
-mlx = seeed_mlx90640.grove_mxl90640()
-mlx.refresh_rate = seeed_mlx90640.RefreshRate.REFRESH_0_5_HZ
+mlx.setup(32)
 
 
 windows = tk.Tk()
@@ -41,7 +41,7 @@ windows.geometry('500x500')
 
 c = tk.Canvas(windows, width=800 , height=800)
 c.grid(row = 1, column = 0)
-frame = [0]*768
+
 
 label_frame = tk.Frame(windows)
 label_frame.grid(row=0, column=0, sticky='w')
@@ -57,7 +57,7 @@ center_label.grid(row=2, column=0, sticky='w')
 def loop_Process():
     print("Scanning")
     try: 
-        mlx.getFrame(frame)
+        frame = mlx.get_frame()
     except ValueError:
         print("ReadError") 
     x = 0
@@ -72,7 +72,7 @@ def loop_Process():
 
     for t in range(0, len(frame)):
        # print(frame[t])
-        if frame[t] == 'nan':
+        if math.isnan(frame[t]) == True:
             frame[t] = low_temp
         temp_color(x, y, frame[t], low_temp)
         x += 1
@@ -82,9 +82,10 @@ def loop_Process():
     low_label.configure(text=('Lowest Temp=' + str("%2f" % low_temp)))
     high_label.configure(text=('Highest Temp= '+ str("%2f" % high_temp)))
     center_label.configure(text=('Center Temp= '+ str("%2f" % frame[384])))
-    windows.after(400, loop_Process)
+    windows.after(100, loop_Process)
     
 
-windows.after(400, loop_Process)
+windows.after(100, loop_Process)
 
 windows.mainloop()
+mlx.cleanup()

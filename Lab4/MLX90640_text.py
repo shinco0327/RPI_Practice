@@ -1,4 +1,7 @@
 import seeed_mlx90640
+import time
+ 
+
 mlx = seeed_mlx90640.grove_mxl90640()
 mlx.refresh_rate = seeed_mlx90640.RefreshRate.REFRESH_0_5_HZ
 #/boot/config.txt i2c baudrate=50K
