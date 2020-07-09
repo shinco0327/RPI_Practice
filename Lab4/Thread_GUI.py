@@ -1,10 +1,17 @@
-#library: https://github.com/pimoroni/mlx90640-library 
 import tkinter as tk
 import MLX90640 as mlx
 import math
+import threading
+import time
 
-
-
+def get_Temp():
+    while 1:
+        try: 
+            print("Scaning")
+            global frame
+            frame = mlx.get_frame()
+        except ValueError:
+            print("ReadError") 
 
 def draw_rectangle(x, y, r, g, b):
     c.create_rectangle(x*10, y*10, (x*10)+10, (y*10)+10, fill=_from_rgb(r, g, b), outline='')
@@ -57,34 +64,35 @@ high_label.grid(row=1, column=0, sticky='w')
 center_label = tk.Label(label_frame)
 center_label.grid(row=2, column=0, sticky='w')
 
-def loop_Process():
-    print("Scanning")
-    try: 
-        frame = mlx.get_frame()
-    except ValueError:
-        print("ReadError") 
-    x = 0
-    y = 0
-    low_temp = 1000.0
-    high_temp = -100
-    for i in frame:
-        if float(i) < low_temp:
-            low_temp = i
-        if float(i) > high_temp:
-            high_temp = i
+thread1 = threading.Thread(target = get_Temp)
+thread1.start()
 
-    for t in range(0, len(frame)):
-       # print(frame[t])
-        if math.isnan(frame[t]) == True:
-            frame[t] = low_temp
-        temp_color(x, y, frame[t], low_temp)
-        x += 1
-        if x > 31:
-            y += 1
-            x = 0
-    low_label.configure(text=('Lowest Temp=' + str("%2f" % low_temp)))
-    high_label.configure(text=('Highest Temp= '+ str("%2f" % high_temp)))
-    center_label.configure(text=('Center Temp= '+ str("%2f" % frame[384])))
+def loop_Process():
+    try:
+        x = 0
+        y = 0
+        low_temp = 1000.0
+        high_temp = -100
+        for i in frame:
+            if float(i) < low_temp:
+                low_temp = i
+            if float(i) > high_temp:
+                high_temp = i
+
+        for t in range(0, len(frame)):
+            # print(frame[t])
+            if math.isnan(frame[t]) == True:
+                frame[t] = low_temp
+            temp_color(x, y, frame[t], low_temp)
+            x += 1
+            if x > 31:
+                y += 1
+                x = 0
+        low_label.configure(text=('Lowest Temp=' + str("%2f" % low_temp)))
+        high_label.configure(text=('Highest Temp= '+ str("%2f" % high_temp)))
+        center_label.configure(text=('Center Temp= '+ str("%2f" % frame[384])))
+    except Exception as e:
+        pass
     windows.after(5, loop_Process)
     
 
